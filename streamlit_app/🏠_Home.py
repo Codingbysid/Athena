@@ -16,10 +16,9 @@ sys.path.append(str(Path(__file__).parent / "styles"))
 # Import our custom modules
 from athena_models import get_model_service, get_sample_opportunities, get_model_service_status
 from charts import create_health_score_gauge, create_risk_distribution_pie
-from athena_styles import load_advanced_css, create_animated_metric, create_typing_text
-from components.3d_animations import (
-    create_3d_hero_section, create_3d_metric_card, create_3d_feature_card,
-    create_3d_parallax_section, create_floating_elements, create_3d_navigation
+from athena_styles import (
+    load_advanced_css, create_metric_card, create_feature_card,
+    create_success_message, create_info_message
 )
 
 # Configure the page
@@ -59,16 +58,9 @@ def get_cached_portfolio_analysis(_model_service, sample_opportunities):
     return portfolio_data
 
 def main():
-    # 3D Hero Section with floating elements
-    st.markdown(create_floating_elements(), unsafe_allow_html=True)
-    
-    # 3D Hero Section
-    hero_section = create_3d_hero_section()
-    st.markdown(hero_section, unsafe_allow_html=True)
-    
-    # 3D Navigation
-    nav_section = create_3d_navigation()
-    st.markdown(nav_section, unsafe_allow_html=True)
+    # Clean Hero Section
+    st.markdown('<h1 class="main-header">🚀 ATHENA</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">AI-Powered Sales Intelligence Platform</p>', unsafe_allow_html=True)
     
     # Quick Demo Button
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -78,212 +70,97 @@ def main():
     
     st.markdown("---")
     
-    # 3D Business Impact Metrics
+    # Business Impact Metrics
     st.markdown("## 📈 **Proven Business Impact**")
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        metric1 = create_3d_metric_card("Model Performance Improvement", "+11.7%", "+11.7%", "📊")
+        metric1 = create_metric_card("Model Performance", "+11.7%", "+11.7%")
         st.markdown(metric1, unsafe_allow_html=True)
     
     with col2:
-        metric2 = create_3d_metric_card("Win Rate Increase", "+15%", "+15%", "🎯")
+        metric2 = create_metric_card("Win Rate", "+15%", "+15%")
         st.markdown(metric2, unsafe_allow_html=True)
     
     with col3:
-        metric3 = create_3d_metric_card("Sales Cycle Reduction", "-20%", "-20%", "⚡")
+        metric3 = create_metric_card("Sales Cycle", "-20%", "-20%")
         st.markdown(metric3, unsafe_allow_html=True)
     
     with col4:
-        metric4 = create_3d_metric_card("Forecast Accuracy", "85%", "+25%", "📈")
+        metric4 = create_metric_card("Forecast Accuracy", "85%", "+25%")
         st.markdown(metric4, unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # 3D Key Features
+    # Key Features
     st.markdown("## 🎯 **Key Features**")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        feature1 = create_3d_feature_card(
+        feature1 = create_feature_card(
             "Intelligent Health Scoring",
             "Advanced ensemble ML models (XGBoost + LightGBM) analyze 48+ features to predict opportunity health scores with 70% AUC accuracy.",
-            "🤖",
-            "primary"
+            "🤖"
         )
         st.markdown(feature1, unsafe_allow_html=True)
         
-        feature2 = create_3d_feature_card(
-            "Real-time Analytics",
-            "Interactive dashboards with live monitoring, drift detection, and performance tracking across your entire sales portfolio.",
-            "⚡",
-            "success"
+        feature2 = create_feature_card(
+            "AI-Powered Diagnostics",
+            "Google Gemini AI provides natural language insights and actionable recommendations for improving opportunity health.",
+            "💡"
         )
         st.markdown(feature2, unsafe_allow_html=True)
     
     with col2:
-        feature3 = create_3d_feature_card(
-            "AI-Powered Diagnostics",
-            "Natural language explanations and actionable recommendations powered by Google Gemini AI for every opportunity.",
-            "🧠",
-            "warning"
+        feature3 = create_feature_card(
+            "Real-time Analytics",
+            "Interactive dashboards with live portfolio health monitoring, risk distribution analysis, and performance tracking.",
+            "📊"
         )
         st.markdown(feature3, unsafe_allow_html=True)
         
-        feature4 = create_3d_feature_card(
-            "Automated Rescue Workflows",
-            "Instant alerts and automated intervention workflows via Salesforce and Slack when deals show signs of risk.",
-            "🛡️",
-            "danger"
+        feature4 = create_feature_card(
+            "Automated Workflows",
+            "Seamless Salesforce integration with automated rescue workflows and Slack notifications for at-risk opportunities.",
+            "⚡"
         )
         st.markdown(feature4, unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Quick Preview Section
-    st.markdown("## 🎮 **Live Preview**")
+    # Technology Stack
+    st.markdown("## 🔬 **Advanced Technology Stack**")
     
-    # Initialize model service with caching and better error handling
-    try:
-        model_service = get_cached_model_service()
-        service_status = get_model_service_status()
-        
-        # Show service status
-        if service_status.get('is_mock'):
-            st.info("🔧 **Demo Mode**: Using mock predictions for demonstration")
-        
-        # Get sample data (cached)
-        sample_opportunities = get_cached_sample_opportunities()
-        
-        # Show a quick demo
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("### Sample Opportunity Health Check")
-            
-            # Select a sample opportunity
-            selected_opp = st.selectbox(
-                "Choose a sample opportunity:",
-                options=range(len(sample_opportunities)),
-                format_func=lambda x: f"{sample_opportunities[x]['Id']} - ${sample_opportunities[x]['Amount']:,} ({sample_opportunities[x]['Industry']})"
-            )
-            
-            if st.button("🔍 Analyze This Opportunity", key="analyze_sample"):
-                with st.spinner("Analyzing opportunity..."):
-                    try:
-                        # Get prediction
-                        result = model_service.predict_health_score(sample_opportunities[selected_opp])
-                        
-                        # Display results
-                        st.success(f"**Health Score: {result['health_score']}/100**")
-                        st.info(f"**Risk Level: {result['risk_level']}**")
-                        
-                        # Show warnings if any
-                        if result.get('is_mock_prediction'):
-                            st.caption("🔧 This is a demo prediction")
-                        
-                        # Show model breakdown
-                        if 'model_predictions' in result and result['model_predictions']:
-                            st.markdown("**Model Breakdown:**")
-                            predictions = result['model_predictions']
-                            if 'ensemble' in predictions:
-                                st.write(f"• **Ensemble: {predictions['ensemble']:.1%}**")
-                            if 'xgb' in predictions:
-                                st.write(f"• XGBoost: {predictions['xgb']:.1%}")
-                            if 'lightgbm' in predictions:
-                                st.write(f"• LightGBM: {predictions['lightgbm']:.1%}")
-                            if 'mock' in predictions:
-                                st.write(f"• Demo Model: {predictions['mock']:.1%}")
-                        
-                    except Exception as e:
-                        st.error(f"Error analyzing opportunity: {str(e)}")
-                        st.info("💡 **Tip**: Try selecting a different opportunity or refresh the page")
-        
-        with col2:
-            st.markdown("### Portfolio Overview")
-            
-            # Use cached portfolio analysis
-            try:
-                with st.spinner("Analyzing portfolio..."):
-                    portfolio_data = get_cached_portfolio_analysis(model_service, sample_opportunities)
-                
-                if portfolio_data:
-                    # Show risk distribution
-                    fig = create_risk_distribution_pie(portfolio_data)
-                    st.plotly_chart(fig, use_container_width=True)
-                    
-                    # Show summary stats
-                    avg_health = sum(r['health_score'] for r in portfolio_data) / len(portfolio_data)
-                    at_risk_count = sum(1 for r in portfolio_data if r['health_score'] < 60)
-                    
-                    col_a, col_b = st.columns(2)
-                    with col_a:
-                        st.metric("Avg Health Score", f"{avg_health:.0f}")
-                    with col_b:
-                        st.metric("At Risk Deals", at_risk_count)
-                else:
-                    st.info("Portfolio analysis will appear here")
-            except Exception as e:
-                st.warning(f"Portfolio analysis unavailable: {str(e)}")
-                st.info("Using sample visualization")
-                # Show a sample chart
-                fig = create_risk_distribution_pie([])
-                st.plotly_chart(fig, use_container_width=True)
+    tech_col1, tech_col2, tech_col3 = st.columns(3)
     
-    except Exception as e:
-        st.warning(f"Model service initialization failed: {str(e)}")
-        st.info("💡 **Demo continues**: Using fallback mode for demonstration")
-        
-        # Show fallback content
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("### Sample Analysis (Demo Mode)")
-            st.info("**Sample Health Score: 73/100**")
-            st.info("**Risk Level: Medium Risk**")
-        with col2:
-            st.markdown("### Sample Portfolio")
-            # Show sample chart
-            fig = create_risk_distribution_pie([])
-            st.plotly_chart(fig, use_container_width=True)
+    with tech_col1:
+        st.markdown("### 🤖 **Machine Learning**")
+        st.markdown("""
+        - **Ensemble Models**: XGBoost + LightGBM
+        - **Hyperparameter Optimization**: Optuna
+        - **Feature Engineering**: 48+ engineered features
+        - **Model Performance**: 70% AUC accuracy
+        """)
     
-    st.markdown("---")
+    with tech_col2:
+        st.markdown("### 🌐 **AI Integration**")
+        st.markdown("""
+        - **Google Gemini API**: Natural language insights
+        - **Real-time Analysis**: Live opportunity scoring
+        - **Intelligent Diagnostics**: AI-powered recommendations
+        - **Contextual Understanding**: Deep opportunity analysis
+        """)
     
-    # 3D Technology Section with Parallax
-    parallax_section = create_3d_parallax_section()
-    st.markdown(parallax_section, unsafe_allow_html=True)
-    
-    st.markdown("## 🔬 **Advanced Technology**")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        tech1 = create_3d_feature_card(
-            "Machine Learning",
-            "Ensemble Models (XGBoost + LightGBM), 48+ Features, 70% AUC, Real-time Scoring",
-            "🤖",
-            "primary"
-        )
-        st.markdown(tech1, unsafe_allow_html=True)
-    
-    with col2:
-        tech2 = create_3d_feature_card(
-            "AI Integration",
-            "Google Gemini diagnostics, Contextual Insights, Automated Workflows, Continuous Learning",
-            "🧠",
-            "success"
-        )
-        st.markdown(tech2, unsafe_allow_html=True)
-    
-    with col3:
-        tech3 = create_3d_feature_card(
-            "Enterprise Ready",
-            "Salesforce Integration, Real-time Monitoring, Scalable Architecture, Security",
-            "⚙️",
-            "warning"
-        )
-        st.markdown(tech3, unsafe_allow_html=True)
+    with tech_col3:
+        st.markdown("### 🏗️ **Infrastructure**")
+        st.markdown("""
+        - **Streamlit**: Interactive web application
+        - **Supabase**: Authentication & database
+        - **Salesforce**: CRM integration
+        - **Slack**: Automated notifications
+        """)
     
     st.markdown("---")
     
@@ -293,77 +170,19 @@ def main():
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown("""
-        <div style="text-align: center;">
-            <p style="font-size: 1.2rem; margin: 2rem 0;">
-                Experience the power of AI-driven sales intelligence. 
-                Predict opportunity health, prevent deal loss, and accelerate revenue growth.
-            </p>
+        <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 1rem; border: 1px solid #e2e8f0;">
+            <h3 style="color: #2563eb; margin-bottom: 1rem;">Start Your Demo Today</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">Experience the power of AI-driven sales intelligence</p>
         </div>
         """, unsafe_allow_html=True)
-        
-        col_a, col_b = st.columns(2)
-        with col_a:
-            if st.button("🎮 Try Live Demo", key="cta_demo", use_container_width=True):
-                st.switch_page("pages/02_🎮_Live_Demo.py")
-        with col_b:
-            if st.button("📊 View Analytics", key="cta_analytics", use_container_width=True):
-                st.switch_page("pages/03_📊_Analytics.py")
-
-# Sidebar
-def setup_sidebar():
-    st.sidebar.markdown("## 🚀 Athena Navigation")
     
-    st.sidebar.markdown("""
-    ### Quick Links
-    - 🏠 **Homepage** - Overview and features
-    - 🎮 **Live Demo** - Interactive health checker
-    - 📊 **Analytics** - Real-time dashboards
-    - 🔬 **Technology** - ML model details
-    """)
-    
-    st.sidebar.markdown("---")
-    
-    # Model Status with caching
-    st.sidebar.markdown("### 🤖 Model Status")
-    try:
-        service_status = get_model_service_status()
-        
-        if service_status['status'] == 'ready':
-            if service_status.get('is_mock'):
-                st.sidebar.warning("🔧 Demo Mode")
-                st.sidebar.caption("Using mock predictions")
-            else:
-                st.sidebar.success("✅ Models Ready")
-        elif service_status['status'] == 'error':
-            st.sidebar.error("❌ Model Error")
-            if service_status.get('is_mock'):
-                st.sidebar.info("🔧 Fallback: Demo mode active")
-        else:
-            st.sidebar.warning("⚠️ Initializing...")
-        
-        # Get model info (cached)
-        try:
-            model_service = get_cached_model_service()
-            model_info = model_service.get_model_info()
-            
-            st.sidebar.markdown(f"""
-            **System Status:**
-            - Service: {'Demo' if service_status.get('is_mock') else 'Production'}
-            - Ensemble: {'✅' if model_info['models_loaded'].get('ensemble') else '❌'}
-            - XGBoost: {'✅' if model_info['models_loaded'].get('xgboost') else '❌'}
-            - LightGBM: {'✅' if model_info['models_loaded'].get('lightgbm') else '❌'}
-            """)
-        except Exception:
-            st.sidebar.caption("Model details unavailable")
-        
-    except Exception as e:
-        st.sidebar.error("❌ Status Unknown")
-        st.sidebar.caption("Please refresh to retry")
-    
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 📞 Support")
-    st.sidebar.info("Built for Tableau Hackathon 2025\n\n🎯 Transforming Sales Operations with AI")
+    # Footer
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align: center; color: #64748b; font-size: 0.875rem; padding: 1rem;">
+        Built with ❤️ for the hackathon | Powered by AI & ML
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
-    setup_sidebar()
     main()
