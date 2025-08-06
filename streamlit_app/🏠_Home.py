@@ -1,6 +1,6 @@
 """
 🚀 Athena: AI-Powered Sales Intelligence Platform
-Main Streamlit Application - Homepage with Premium 3D Design
+Main Streamlit Application - Homepage with Premium 3D Design & Authentication
 """
 
 import streamlit as st
@@ -57,13 +57,57 @@ def get_cached_portfolio_analysis(_model_service, sample_opportunities):
             continue
     return portfolio_data
 
+def create_user_header():
+    """Create user header with authentication info"""
+    if st.session_state.get('authenticated', False):
+        user_email = st.session_state.get('user_email', 'demo@athena.ai')
+        user_name = st.session_state.get('user_name', 'Demo User')
+        
+        # User info in sidebar
+        with st.sidebar:
+            st.markdown("""
+            <div style="background: var(--bg-card); border-radius: var(--radius-lg); padding: 1rem; margin-bottom: 1rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.5rem;">👤</span>
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-primary);">{}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">{}</div>
+                    </div>
+                </div>
+            </div>
+            """.format(user_name, user_email), unsafe_allow_html=True)
+            
+            # Logout button
+            if st.button("🚪 Logout", key="logout_button", use_container_width=True):
+                st.session_state.authenticated = False
+                st.session_state.user_email = None
+                st.session_state.user_name = None
+                st.rerun()
+            
+            st.markdown("---")
+
 def main():
+    # Check authentication
+    if not st.session_state.get('authenticated', False):
+        st.switch_page("auth_system.py")
+    
     # Add floating particles background
     st.markdown(add_floating_particles(), unsafe_allow_html=True)
+    
+    # Create user header
+    create_user_header()
     
     # Premium Hero Section
     st.markdown('<h1 class="main-header">🚀 ATHENA</h1>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">AI-Powered Sales Intelligence Platform</p>', unsafe_allow_html=True)
+    
+    # Welcome message
+    user_name = st.session_state.get('user_name', 'Demo User')
+    st.markdown(f"""
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <p style="color: var(--text-secondary); font-size: 1.1rem;">Welcome back, <strong style="color: var(--primary);">{user_name}</strong>! 👋</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Premium Demo Button
     col1, col2, col3 = st.columns([1, 2, 1])
