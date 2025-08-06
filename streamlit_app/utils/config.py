@@ -16,6 +16,9 @@ class AthenaConfig:
     def _load_config(self):
         """Load configuration from environment and defaults"""
         
+        # Load environment variables
+        self._load_env_variables()
+        
         # Base paths
         self.BASE_DIR = Path(__file__).parent.parent.parent
         self.MODELS_DIR = self.BASE_DIR / "models"
@@ -47,6 +50,40 @@ class AthenaConfig:
             'show_warnings': True,
             'auto_refresh': False,
             'debug_mode': os.getenv('DEBUG_MODE', 'false').lower() == 'true'
+        }
+        
+        # API Keys and External Services
+        self.API_KEYS = {
+            'gemini_api_key': os.getenv('GEMINI_API_KEY'),
+            'openai_api_key': os.getenv('OPENAI_API_KEY'),
+            'anthropic_api_key': os.getenv('ANTHROPIC_API_KEY'),
+            'salesforce_client_id': os.getenv('SALESFORCE_CLIENT_ID'),
+            'salesforce_client_secret': os.getenv('SALESFORCE_CLIENT_SECRET'),
+            'salesforce_username': os.getenv('SALESFORCE_USERNAME'),
+            'salesforce_password': os.getenv('SALESFORCE_PASSWORD'),
+            'salesforce_security_token': os.getenv('SALESFORCE_SECURITY_TOKEN'),
+            'salesforce_instance_url': os.getenv('SALESFORCE_INSTANCE_URL'),
+            'supabase_url': os.getenv('SUPABASE_URL'),
+            'supabase_anon_key': os.getenv('SUPABASE_ANON_KEY'),
+            'supabase_service_role_key': os.getenv('SUPABASE_SERVICE_ROLE_KEY'),
+            'slack_bot_token': os.getenv('SLACK_BOT_TOKEN'),
+            'slack_webhook_url': os.getenv('SLACK_WEBHOOK_URL'),
+            'sendgrid_api_key': os.getenv('SENDGRID_API_KEY'),
+            'sentry_dsn': os.getenv('SENTRY_DSN'),
+            'secret_key': os.getenv('SECRET_KEY', 'athena-secret-key-change-in-production'),
+            'jwt_secret': os.getenv('JWT_SECRET', 'athena-jwt-secret-change-in-production')
+        }
+        
+        # Feature Flags
+        self.FEATURE_FLAGS = {
+            'enable_gemini_ai': os.getenv('ENABLE_GEMINI_AI', 'true').lower() == 'true',
+            'enable_salesforce_integration': os.getenv('ENABLE_SALESFORCE_INTEGRATION', 'true').lower() == 'true',
+            'enable_supabase_auth': os.getenv('ENABLE_SUPABASE_AUTH', 'false').lower() == 'true',
+            'enable_slack_notifications': os.getenv('ENABLE_SLACK_NOTIFICATIONS', 'true').lower() == 'true',
+            'enable_email_notifications': os.getenv('ENABLE_EMAIL_NOTIFICATIONS', 'false').lower() == 'true',
+            'enable_monitoring': os.getenv('ENABLE_MONITORING', 'true').lower() == 'true',
+            'enable_analytics': os.getenv('ENABLE_ANALYTICS', 'true').lower() == 'true',
+            'enable_animations': os.getenv('ENABLE_ANIMATIONS', 'true').lower() == 'true'
         }
         
         # Validation rules
@@ -222,6 +259,28 @@ class AthenaConfig:
     def get_success_message(self, success_type: str) -> str:
         """Get user-friendly success message"""
         return self.SUCCESS_MESSAGES.get(success_type, "Operation completed successfully")
+    
+    def _load_env_variables(self):
+        """Load environment variables from .env file"""
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except ImportError:
+            # dotenv not installed, continue without it
+            pass
+    
+    def get_api_key(self, key_name: str) -> str:
+        """Get API key safely"""
+        return self.API_KEYS.get(key_name, '')
+    
+    def is_feature_enabled(self, feature_name: str) -> bool:
+        """Check if a feature is enabled"""
+        return self.FEATURE_FLAGS.get(feature_name, False)
+    
+    def has_valid_api_key(self, key_name: str) -> bool:
+        """Check if API key is valid (not empty)"""
+        key = self.get_api_key(key_name)
+        return key is not None and key.strip() != '' and key != f'your_{key_name}_here'
 
 # Global configuration instance
 _config = None
