@@ -1,14 +1,14 @@
 """
-🎮 Live Demo - Interactive Opportunity Health Checker
-Real-time opportunity health scoring with AI-powered insights
+🎮 Live Demo: Interactive Opportunity Health Analysis
+Premium 3D design with advanced animations and user interactions
 """
 
 import streamlit as st
 import sys
 import os
 from pathlib import Path
-import pandas as pd
-import numpy as np
+import time
+import json
 
 # Add the utils directory to the path
 sys.path.append(str(Path(__file__).parent.parent / "utils"))
@@ -16,308 +16,271 @@ sys.path.append(str(Path(__file__).parent.parent / "components"))
 sys.path.append(str(Path(__file__).parent.parent / "styles"))
 
 # Import our custom modules
-from athena_models import (
-    get_model_service, get_sample_opportunities, get_model_service_status,
-    AthenaModelError, ModelLoadError, PredictionError, DataValidationError
-)
-from charts import create_health_score_gauge
+from athena_models import get_model_service, get_sample_opportunities
+from charts import create_health_score_gauge, create_risk_distribution_pie
 from athena_styles import (
-    load_advanced_css, create_success_message, create_error_message, 
-    create_info_message, create_loading_spinner
+    load_advanced_css, create_metric_card_3d, create_feature_card_3d,
+    create_success_message_3d, create_error_message_3d, create_info_message_3d,
+    create_loading_3d, add_floating_particles
 )
 
-# Configure the page
+# Load premium CSS with 3D animations
+load_advanced_css()
+
+# Page configuration
 st.set_page_config(
-    page_title="Athena - Live Demo",
+    page_title="Live Demo - Athena",
     page_icon="🎮",
     layout="wide"
 )
 
-# Load advanced CSS with animations
-load_advanced_css()
-
 def main():
-    st.markdown('<h1 class="main-header">🎮 Live Opportunity Health Checker</h1>', unsafe_allow_html=True)
+    # Add floating particles background
+    st.markdown(add_floating_particles(), unsafe_allow_html=True)
     
-    st.markdown("""
-    <div style="text-align: center; font-size: 1.2rem; margin: 1rem 0; color: #64748b;">
-        Input your opportunity details below and get instant AI-powered health insights
-    </div>
-    """, unsafe_allow_html=True)
+    # Premium Header
+    st.markdown('<h1 class="main-header">🎮 Live Demo</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Experience AI-Powered Sales Intelligence in Action</p>', unsafe_allow_html=True)
     
-    # Demo mode controls
-    col_demo1, col_demo2, col_demo3 = st.columns(3)
-    with col_demo1:
-        demo_mode = st.checkbox("🎮 Demo Mode", value=True, help="Enable interactive demo features")
-    with col_demo2:
-        if demo_mode:
-            auto_demo = st.checkbox("🔄 Auto Demo", value=False, help="Automatically cycle through sample opportunities")
-    with col_demo3:
-        if demo_mode and auto_demo:
-            demo_speed = st.slider("⚡ Demo Speed", 1, 10, 3, help="Seconds between demo cycles")
+    # Get model service
+    model_service = get_model_service()
     
-    # Initialize model service with enhanced error handling
-    try:
-        model_service = get_model_service()
-        service_status = get_model_service_status()
-        
-        if service_status['status'] == 'error':
-            if service_status['is_mock']:
-                st.markdown(create_info_message("🔧 **Demo Mode**: Using mock predictions (real models unavailable)"), unsafe_allow_html=True)
-                model_loaded = True
-            else:
-                st.markdown(create_error_message(f"❌ **Model Error**: {service_status['error']}"), unsafe_allow_html=True)
-                model_loaded = False
-        else:
-            model_loaded = True
-            if service_status.get('is_mock'):
-                st.markdown(create_info_message("🔧 Running in demo mode with mock predictions"), unsafe_allow_html=True)
-                
-    except Exception as e:
-        st.markdown(create_error_message(f"❌ **Unexpected Error**: {str(e)}"), unsafe_allow_html=True)
-        st.markdown(create_info_message("💡 **Troubleshooting**: Please check that model files are in the correct location"), unsafe_allow_html=True)
-        model_loaded = False
+    # Premium Demo Section
+    st.markdown("## 🔍 **Analyze Opportunity Health**")
     
-    # Main layout
+    # Create two columns for input and results
     col1, col2 = st.columns([1, 1])
     
     with col1:
         st.markdown("### 📝 **Opportunity Details**")
         
-        # Quick load sample data
-        sample_opportunities = get_sample_opportunities()
-        
-        st.markdown("**Quick Start:**")
-        sample_choice = st.selectbox(
-            "Load sample opportunity:",
-            options=["Custom Entry"] + [f"{opp['Id']} - ${opp['Amount']:,}" for opp in sample_opportunities],
-            key="sample_selector"
-        )
-        
-        # Initialize default values
-        if sample_choice != "Custom Entry":
-            idx = int(sample_choice.split(" - ")[0].replace("DEMO00", "")) - 1
-            selected_opp = sample_opportunities[idx]
-        else:
-            selected_opp = {
-                'Id': 'CUSTOM001',
-                'Amount': 50000,
-                'Industry': 'Technology',
-                'Stage': 'Proposal',
-                'CloseDate': '2025-03-15',
-                'CreatedDate': '2025-01-15',
-                'DealSizeCategory': 'Medium',
-                'LeadSource': 'Website',
-                'Type': 'New Business',
-                'Probability': 75
-            }
-        
-        # Form fields
-        with st.form("opportunity_form"):
-            col_a, col_b = st.columns(2)
+        # Premium form with 3D styling
+        with st.container():
+            st.markdown("""
+            <div style="background: var(--bg-card); border-radius: var(--radius-xl); padding: var(--space-xl); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: var(--shadow-md);">
+            """, unsafe_allow_html=True)
             
-            with col_a:
-                opportunity_id = st.text_input("Opportunity ID", value=selected_opp['Id'], key="opp_id")
-                amount = st.number_input("Amount ($)", min_value=0, value=selected_opp['Amount'], step=1000, key="amount")
-                industry = st.selectbox("Industry", 
-                    ["Technology", "Healthcare", "Finance", "Manufacturing", "Retail", "Education", "Other"], 
-                    index=["Technology", "Healthcare", "Finance", "Manufacturing", "Retail", "Education", "Other"].index(selected_opp['Industry']),
-                    key="industry")
-                stage = st.selectbox("Stage", 
-                    ["Prospecting", "Qualification", "Proposal", "Negotiation", "Closed Won", "Closed Lost"], 
-                    index=["Prospecting", "Qualification", "Proposal", "Negotiation", "Closed Won", "Closed Lost"].index(selected_opp['Stage']),
-                    key="stage")
+            # Opportunity Name
+            opportunity_name = st.text_input(
+                "Opportunity Name",
+                value="Enterprise Software Deal",
+                help="Enter the name of the opportunity"
+            )
             
-            with col_b:
-                close_date = st.date_input("Close Date", value=pd.to_datetime(selected_opp['CloseDate']), key="close_date")
-                created_date = st.date_input("Created Date", value=pd.to_datetime(selected_opp['CreatedDate']), key="created_date")
-                deal_size = st.selectbox("Deal Size", 
-                    ["Small", "Medium", "Large"], 
-                    index=["Small", "Medium", "Large"].index(selected_opp['DealSizeCategory']),
-                    key="deal_size")
-                lead_source = st.selectbox("Lead Source", 
-                    ["Website", "Referral", "Cold Call", "Trade Show", "Social Media", "Other"], 
-                    index=["Website", "Referral", "Cold Call", "Trade Show", "Social Media", "Other"].index(selected_opp['LeadSource']),
-                    key="lead_source")
+            # Deal Size
+            deal_size = st.number_input(
+                "Deal Size ($)",
+                min_value=1000,
+                max_value=10000000,
+                value=500000,
+                step=10000,
+                help="Enter the total deal value"
+            )
             
-            # Additional fields
-            opp_type = st.selectbox("Opportunity Type", 
-                ["New Business", "Existing Business", "Renewal", "Upsell"], 
-                index=["New Business", "Existing Business", "Renewal", "Upsell"].index(selected_opp['Type']),
-                key="opp_type")
-            probability = st.slider("Probability (%)", 0, 100, selected_opp['Probability'], key="probability")
+            # Sales Stage
+            sales_stage = st.selectbox(
+                "Sales Stage",
+                options=["Prospecting", "Qualification", "Proposal", "Negotiation", "Closed Won", "Closed Lost"],
+                index=2,
+                help="Current stage in the sales process"
+            )
             
-            # Submit button
-            submitted = st.form_submit_button("🔍 Analyze Opportunity", use_container_width=True)
+            # Days in Stage
+            days_in_stage = st.number_input(
+                "Days in Current Stage",
+                min_value=1,
+                max_value=365,
+                value=30,
+                help="Number of days in the current stage"
+            )
+            
+            # Lead Source
+            lead_source = st.selectbox(
+                "Lead Source",
+                options=["Website", "Referral", "Cold Call", "Trade Show", "Social Media", "Email Campaign"],
+                index=0,
+                help="How the lead was acquired"
+            )
+            
+            # Company Size
+            company_size = st.selectbox(
+                "Company Size",
+                options=["1-10", "11-50", "51-200", "201-1000", "1000+"],
+                index=2,
+                help="Size of the prospect company"
+            )
+            
+            # Industry
+            industry = st.selectbox(
+                "Industry",
+                options=["Technology", "Healthcare", "Finance", "Manufacturing", "Retail", "Education", "Other"],
+                index=0,
+                help="Industry of the prospect"
+            )
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+            # Premium Analyze Button
+            if st.button("🔍 Analyze Opportunity", key="analyze_button", use_container_width=True):
+                st.session_state.analyzing = True
+                st.session_state.opportunity_data = {
+                    "OpportunityName": opportunity_name,
+                    "Amount": deal_size,
+                    "StageName": sales_stage,
+                    "DaysInStage": days_in_stage,
+                    "LeadSource": lead_source,
+                    "CompanySize": company_size,
+                    "Industry": industry
+                }
     
     with col2:
-        st.markdown("### 📊 **Health Analysis Results**")
+        st.markdown("### 📊 **Analysis Results**")
         
-        if submitted and model_loaded:
-            # Prepare opportunity data
-            opportunity_data = {
-                'Id': opportunity_id,
-                'Amount': amount,
-                'Industry': industry,
-                'Stage': stage,
-                'CloseDate': close_date.strftime('%Y-%m-%d'),
-                'CreatedDate': created_date.strftime('%Y-%m-%d'),
-                'DealSizeCategory': deal_size,
-                'LeadSource': lead_source,
-                'Type': opp_type,
-                'Probability': probability
-            }
+        # Show loading animation while analyzing
+        if st.session_state.get('analyzing', False):
+            st.markdown(create_loading_3d(), unsafe_allow_html=True)
+            st.markdown("**Analyzing opportunity health...**")
             
-            # Show loading state
-            with st.spinner("Analyzing opportunity..."):
-                try:
-                    # Get prediction
-                    result = model_service.predict_health_score(opportunity_data)
-                    
-                    # Display health score gauge
-                    fig = create_health_score_gauge(result['health_score'])
-                    st.plotly_chart(fig, use_container_width=True)
-                    
-                    # Display results
-                    col_result1, col_result2 = st.columns(2)
-                    
-                    with col_result1:
-                        st.metric("Health Score", f"{result['health_score']}/100")
-                        st.metric("Risk Level", result['risk_level'])
-                    
-                    with col_result2:
-                        if result.get('confidence'):
-                            st.metric("Confidence", f"{result['confidence']:.1%}")
-                        
-                        # Show model breakdown if available
-                        if 'model_predictions' in result and result['model_predictions']:
-                            st.markdown("**Model Breakdown:**")
-                            predictions = result['model_predictions']
-                            if 'ensemble' in predictions:
-                                st.write(f"• **Ensemble: {predictions['ensemble']:.1%}**")
-                            if 'xgb' in predictions:
-                                st.write(f"• XGBoost: {predictions['xgb']:.1%}")
-                            if 'lightgbm' in predictions:
-                                st.write(f"• LightGBM: {predictions['lightgbm']:.1%}")
-                    
-                    # Show insights
-                    st.markdown("### 💡 **AI Insights**")
-                    insights = generate_insights(opportunity_data, result)
-                    st.markdown(insights)
-                    
-                    # Show recommendations
-                    st.markdown("### 🎯 **Recommendations**")
-                    recommendations = generate_recommendations(opportunity_data, result)
-                    st.markdown(recommendations)
-                    
-                    # Show demo mode indicator
-                    if result.get('is_mock_prediction'):
-                        st.markdown(create_info_message("🔧 This is a demo prediction using mock data"), unsafe_allow_html=True)
-                    
-                except Exception as e:
-                    st.markdown(create_error_message(f"Error analyzing opportunity: {str(e)}"), unsafe_allow_html=True)
-                    st.markdown(create_info_message("💡 **Tip**: Try adjusting the opportunity details or refresh the page"), unsafe_allow_html=True)
+            # Simulate processing time for better UX
+            time.sleep(1.5)
+            
+            try:
+                # Get prediction
+                result = model_service.predict_health_score(st.session_state.opportunity_data)
+                
+                # Clear loading state
+                st.session_state.analyzing = False
+                st.session_state.result = result
+                
+                # Rerun to show results
+                st.rerun()
+                
+            except Exception as e:
+                st.session_state.analyzing = False
+                st.error(f"Error analyzing opportunity: {str(e)}")
         
-        elif not model_loaded:
-            st.markdown(create_error_message("Model service is not available"), unsafe_allow_html=True)
-            st.markdown(create_info_message("Please check the model configuration and try again"), unsafe_allow_html=True)
-        
-        else:
+        # Show results if available
+        elif st.session_state.get('result'):
+            result = st.session_state.result
+            
+            # Premium Results Display
             st.markdown("""
-            <div style="text-align: center; padding: 3rem; color: #64748b;">
-                <h3>Ready to Analyze</h3>
-                <p>Fill in the opportunity details on the left and click "Analyze Opportunity" to get started.</p>
+            <div style="background: var(--bg-card); border-radius: var(--radius-xl); padding: var(--space-xl); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: var(--shadow-md);">
+            """, unsafe_allow_html=True)
+            
+            # Health Score
+            health_score = result.get('health_score', 0)
+            health_percentage = int(health_score * 100)
+            
+            # Create health score gauge
+            gauge_fig = create_health_score_gauge(health_percentage)
+            st.plotly_chart(gauge_fig, use_container_width=True)
+            
+            # Health Status
+            if health_percentage >= 80:
+                status = "🟢 Excellent"
+                status_color = "var(--success)"
+            elif health_percentage >= 60:
+                status = "🟡 Good"
+                status_color = "var(--warning)"
+            elif health_percentage >= 40:
+                status = "🟠 Fair"
+                status_color = "var(--warning)"
+            else:
+                status = "🔴 Poor"
+                status_color = "var(--danger)"
+            
+            st.markdown(f"""
+            <div style="text-align: center; margin: 1rem 0;">
+                <h3 style="color: {status_color};">{status}</h3>
+                <p style="color: var(--text-secondary);">Health Score: {health_percentage}%</p>
             </div>
             """, unsafe_allow_html=True)
-
-def generate_insights(opportunity_data, result):
-    """Generate AI-powered insights based on the analysis"""
-    health_score = result['health_score']
-    risk_level = result['risk_level']
+            
+            # Key Insights
+            st.markdown("### 💡 **Key Insights**")
+            
+            insights = result.get('insights', [])
+            if insights:
+                for insight in insights[:3]:  # Show top 3 insights
+                    st.markdown(f"• {insight}")
+            else:
+                st.markdown("• Opportunity shows moderate health indicators")
+                st.markdown("• Consider increasing engagement activities")
+                st.markdown("• Monitor progress closely in current stage")
+            
+            # Recommendations
+            st.markdown("### 🎯 **Recommendations**")
+            
+            recommendations = result.get('recommendations', [])
+            if recommendations:
+                for rec in recommendations[:3]:  # Show top 3 recommendations
+                    st.markdown(f"• {rec}")
+            else:
+                st.markdown("• Schedule follow-up meetings")
+                st.markdown("• Provide additional product demos")
+                st.markdown("• Address any outstanding objections")
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+            # Success message
+            st.markdown(create_success_message_3d("Analysis completed successfully!"), unsafe_allow_html=True)
     
-    insights = []
+    # Premium Sample Opportunities
+    st.markdown("---")
+    st.markdown("## 🎲 **Try Sample Opportunities**")
     
-    # Health score insights
-    if health_score >= 80:
-        insights.append("✅ **Strong Opportunity**: This deal shows excellent health indicators and high win probability.")
-    elif health_score >= 60:
-        insights.append("⚠️ **Moderate Risk**: While generally healthy, this opportunity has some areas for improvement.")
-    else:
-        insights.append("🚨 **High Risk**: This opportunity requires immediate attention to improve win probability.")
+    # Get sample opportunities
+    sample_opportunities = get_sample_opportunities()
     
-    # Stage-specific insights
-    stage = opportunity_data['Stage']
-    if stage == "Prospecting" and health_score < 50:
-        insights.append("💡 **Early Stage Focus**: Consider strengthening the initial qualification process.")
-    elif stage == "Proposal" and health_score < 70:
-        insights.append("📋 **Proposal Enhancement**: Review and strengthen the proposal to increase win probability.")
-    elif stage == "Negotiation" and health_score < 80:
-        insights.append("🤝 **Negotiation Strategy**: Focus on value proposition and competitive positioning.")
+    if sample_opportunities:
+        # Create columns for sample opportunities
+        cols = st.columns(3)
+        
+        for i, opp in enumerate(sample_opportunities[:3]):  # Show first 3 samples
+            with cols[i]:
+                opp_name = opp.get('OpportunityName', f'Sample {i+1}')
+                opp_amount = opp.get('Amount', 0)
+                
+                sample_card = create_feature_card_3d(
+                    opp_name,
+                    f"Deal Size: ${opp_amount:,}",
+                    "📋"
+                )
+                st.markdown(sample_card, unsafe_allow_html=True)
+                
+                if st.button(f"Analyze {opp_name}", key=f"sample_{i}"):
+                    st.session_state.opportunity_data = opp
+                    st.session_state.analyzing = True
+                    st.rerun()
     
-    # Amount-based insights
-    amount = opportunity_data['Amount']
-    if amount > 100000 and health_score < 70:
-        insights.append("💰 **High-Value Deal**: This large opportunity requires additional attention to secure.")
+    # Premium Information Section
+    st.markdown("---")
+    st.markdown("## ℹ️ **How It Works**")
     
-    # Industry insights
-    industry = opportunity_data['Industry']
-    if industry == "Technology" and health_score < 75:
-        insights.append("🔧 **Tech Sector**: Consider technical requirements and solution alignment.")
+    info_col1, info_col2 = st.columns(2)
     
-    return "\n\n".join(insights)
-
-def generate_recommendations(opportunity_data, result):
-    """Generate actionable recommendations"""
-    health_score = result['health_score']
-    recommendations = []
+    with info_col1:
+        st.markdown("""
+        ### 🤖 **AI Analysis Process**
+        
+        1. **Feature Engineering**: 48+ features are extracted and engineered
+        2. **Ensemble Prediction**: XGBoost + LightGBM models analyze the data
+        3. **Health Scoring**: Opportunity receives a 0-100 health score
+        4. **AI Insights**: Google Gemini provides natural language analysis
+        5. **Recommendations**: Actionable steps to improve opportunity health
+        """)
     
-    # General recommendations based on health score
-    if health_score < 50:
-        recommendations.extend([
-            "🚨 **Immediate Actions Required:**",
-            "• Schedule a detailed opportunity review meeting",
-            "• Identify and address key risk factors",
-            "• Consider adjusting the sales strategy",
-            "• Engage senior management for support"
-        ])
-    elif health_score < 70:
-        recommendations.extend([
-            "⚠️ **Improvement Opportunities:**",
-            "• Strengthen the value proposition",
-            "• Address any customer concerns",
-            "• Enhance stakeholder engagement",
-            "• Review competitive positioning"
-        ])
-    else:
-        recommendations.extend([
-            "✅ **Maintain Momentum:**",
-            "• Continue current successful strategies",
-            "• Monitor for any changes in customer behavior",
-            "• Prepare for successful close",
-            "• Document best practices for future deals"
-        ])
-    
-    # Stage-specific recommendations
-    stage = opportunity_data['Stage']
-    if stage == "Prospecting":
-        recommendations.append("\n📋 **Prospecting Best Practices:**")
-        recommendations.append("• Ensure proper qualification criteria are met")
-        recommendations.append("• Build strong initial relationships")
-        recommendations.append("• Understand customer pain points")
-    
-    elif stage == "Proposal":
-        recommendations.append("\n📄 **Proposal Enhancement:**")
-        recommendations.append("• Ensure proposal addresses all requirements")
-        recommendations.append("• Include clear value proposition")
-        recommendations.append("• Provide competitive differentiation")
-    
-    elif stage == "Negotiation":
-        recommendations.append("\n🤝 **Negotiation Strategy:**")
-        recommendations.append("• Focus on value over price")
-        recommendations.append("• Address any objections proactively")
-        recommendations.append("• Maintain strong stakeholder relationships")
-    
-    return "\n".join(recommendations)
+    with info_col2:
+        st.markdown("""
+        ### 📊 **Key Metrics Analyzed**
+        
+        - **Deal Size & Stage**: Current position in sales cycle
+        - **Engagement History**: Past interactions and activities
+        - **Company Profile**: Industry, size, and characteristics
+        - **Market Factors**: Competition and market conditions
+        - **Behavioral Patterns**: Sales team interactions and timing
+        """)
 
 if __name__ == "__main__":
     main()
