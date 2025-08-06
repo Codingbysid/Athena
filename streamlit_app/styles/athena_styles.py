@@ -447,6 +447,414 @@ def load_advanced_css():
         background: #5a67d8;
     }
     
+    /* 3D Hero Section */
+    .hero-3d-container {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: var(--primary-gradient);
+    }
+    
+    .floating-cube {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        animation: float 6s ease-in-out infinite;
+        transform-style: preserve-3d;
+    }
+    
+    .cube-1 {
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+        transform: rotateX(45deg) rotateY(45deg);
+    }
+    
+    .cube-2 {
+        top: 60%;
+        right: 15%;
+        animation-delay: 2s;
+        transform: rotateX(-30deg) rotateY(60deg);
+    }
+    
+    .cube-3 {
+        bottom: 20%;
+        left: 50%;
+        animation-delay: 4s;
+        transform: rotateX(60deg) rotateY(-45deg);
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotateX(45deg) rotateY(45deg);
+        }
+        50% {
+            transform: translateY(-20px) rotateX(45deg) rotateY(45deg);
+        }
+    }
+    
+    .hero-content {
+        text-align: center;
+        color: white;
+        z-index: 10;
+        animation: fadeInUp 1s ease-out;
+    }
+    
+    .hero-title {
+        font-size: 4rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .hero-subtitle {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+    
+    .hero-description {
+        font-size: 1.2rem;
+        opacity: 0.8;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    /* 3D Metric Cards */
+    .metric-card-3d {
+        perspective: 1000px;
+        margin: 20px 0;
+    }
+    
+    .metric-card-inner {
+        background: var(--primary-gradient);
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        text-align: center;
+        box-shadow: var(--shadow-heavy);
+        transition: all 0.5s ease;
+        transform-style: preserve-3d;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .metric-card-inner:hover {
+        transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+        box-shadow: 0 25px 50px rgba(102, 126, 234, 0.4);
+    }
+    
+    .metric-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .metric-title {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 10px 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .metric-change {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    .metric-glow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.5s ease;
+    }
+    
+    .metric-card-inner:hover .metric-glow {
+        transform: translateX(100%);
+    }
+    
+    /* 3D Feature Cards */
+    .feature-card-3d {
+        perspective: 1000px;
+        margin: 20px 0;
+    }
+    
+    .feature-card-inner {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: var(--shadow-medium);
+        transition: all 0.5s ease;
+        transform-style: preserve-3d;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+    
+    .feature-card-inner:hover {
+        transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+        box-shadow: 0 25px 50px rgba(102, 126, 234, 0.2);
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        text-align: center;
+        animation: bounce 2s ease-in-out infinite;
+    }
+    
+    .feature-title {
+        color: #1e293b;
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+        font-weight: bold;
+    }
+    
+    .feature-description {
+        color: #64748b;
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+    
+    .feature-glow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.5s ease;
+    }
+    
+    .feature-card-inner:hover .feature-glow {
+        transform: translateX(100%);
+    }
+    
+    /* 3D Parallax Section */
+    .parallax-section {
+        position: relative;
+        height: 400px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-gradient);
+    }
+    
+    .parallax-layer {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: parallax 10s ease-in-out infinite;
+    }
+    
+    .layer-1 {
+        animation-delay: 0s;
+        transform: scale(0.5);
+    }
+    
+    .layer-2 {
+        animation-delay: 2s;
+        transform: scale(0.8);
+    }
+    
+    .layer-3 {
+        animation-delay: 4s;
+        transform: scale(1.2);
+    }
+    
+    @keyframes parallax {
+        0%, 100% {
+            transform: translateY(0px) scale(1);
+        }
+        50% {
+            transform: translateY(-50px) scale(1.1);
+        }
+    }
+    
+    .parallax-content {
+        text-align: center;
+        color: white;
+        z-index: 10;
+    }
+    
+    .parallax-content h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .parallax-content p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    
+    /* Floating Elements */
+    .floating-elements {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+    }
+    
+    .floating-element {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 50%;
+        animation: floatElement 8s ease-in-out infinite;
+    }
+    
+    .element-1 {
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+    
+    .element-2 {
+        top: 20%;
+        right: 15%;
+        animation-delay: 2s;
+    }
+    
+    .element-3 {
+        bottom: 30%;
+        left: 20%;
+        animation-delay: 4s;
+    }
+    
+    .element-4 {
+        top: 60%;
+        right: 10%;
+        animation-delay: 6s;
+    }
+    
+    .element-5 {
+        bottom: 20%;
+        right: 30%;
+        animation-delay: 8s;
+    }
+    
+    @keyframes floatElement {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-30px) rotate(180deg);
+        }
+    }
+    
+    /* 3D Navigation */
+    .nav-3d {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 30px 0;
+    }
+    
+    .nav-item {
+        perspective: 1000px;
+        cursor: pointer;
+    }
+    
+    .nav-item > div {
+        background: var(--primary-gradient);
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        text-align: center;
+        transition: all 0.3s ease;
+        transform-style: preserve-3d;
+    }
+    
+    .nav-item:hover > div {
+        transform: translateY(-5px) rotateX(10deg) rotateY(10deg);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+    }
+    
+    .nav-icon {
+        font-size: 2rem;
+        display: block;
+        margin-bottom: 10px;
+    }
+    
+    .nav-text {
+        font-weight: 600;
+    }
+    
+    /* 3D Loading Animation */
+    .loading-3d {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+    }
+    
+    .loading-cube {
+        width: 60px;
+        height: 60px;
+        position: relative;
+        transform-style: preserve-3d;
+        animation: rotate 2s infinite linear;
+    }
+    
+    .cube-face {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        background: var(--primary-gradient);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
+    }
+    
+    .front { transform: translateZ(30px); }
+    .back { transform: translateZ(-30px); }
+    .right { transform: rotateY(90deg) translateZ(30px); }
+    .left { transform: rotateY(-90deg) translateZ(30px); }
+    .top { transform: rotateX(90deg) translateZ(30px); }
+    .bottom { transform: rotateX(-90deg) translateZ(30px); }
+    
+    @keyframes rotate {
+        0% { transform: rotateX(0deg) rotateY(0deg); }
+        100% { transform: rotateX(360deg) rotateY(360deg); }
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-10px);
+        }
+        60% {
+            transform: translateY(-5px);
+        }
+    }
+    
     /* Risk Level Colors */
     .risk-low { 
         background: var(--success-gradient);

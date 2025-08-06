@@ -17,6 +17,10 @@ sys.path.append(str(Path(__file__).parent / "styles"))
 from athena_models import get_model_service, get_sample_opportunities, get_model_service_status
 from charts import create_health_score_gauge, create_risk_distribution_pie
 from athena_styles import load_advanced_css, create_animated_metric, create_typing_text
+from components.3d_animations import (
+    create_3d_hero_section, create_3d_metric_card, create_3d_feature_card,
+    create_3d_parallax_section, create_floating_elements, create_3d_navigation
+)
 
 # Configure the page
 st.set_page_config(
@@ -55,19 +59,16 @@ def get_cached_portfolio_analysis(_model_service, sample_opportunities):
     return portfolio_data
 
 def main():
-    # Hero Section
-    st.markdown('<h1 class="main-header">🚀 ATHENA</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">AI-Powered Sales Intelligence Platform</p>', unsafe_allow_html=True)
+    # 3D Hero Section with floating elements
+    st.markdown(create_floating_elements(), unsafe_allow_html=True)
     
-    # Animated typing text
-    typing_text = create_typing_text("Transform your sales operations with intelligent opportunity health scoring")
-    st.markdown(f"""
-    <div style="text-align: center; font-size: 1.3rem; margin: 2rem 0; color: #64748b;">
-        {typing_text}
-        <br><br>
-        <span style="animation: fadeInUp 2s ease-out 3s both;">Real-time analytics and AI-powered insights that drive revenue growth.</span>
-    </div>
-    """, unsafe_allow_html=True)
+    # 3D Hero Section
+    hero_section = create_3d_hero_section()
+    st.markdown(hero_section, unsafe_allow_html=True)
+    
+    # 3D Navigation
+    nav_section = create_3d_navigation()
+    st.markdown(nav_section, unsafe_allow_html=True)
     
     # Quick Demo Button
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -77,63 +78,67 @@ def main():
     
     st.markdown("---")
     
-    # Business Impact Metrics
+    # 3D Business Impact Metrics
     st.markdown("## 📈 **Proven Business Impact**")
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        metric1 = create_animated_metric("Model Performance<br>Improvement", "+11.7%", "+11.7%")
+        metric1 = create_3d_metric_card("Model Performance Improvement", "+11.7%", "+11.7%", "📊")
         st.markdown(metric1, unsafe_allow_html=True)
     
     with col2:
-        metric2 = create_animated_metric("Win Rate<br>Increase", "+15%", "+15%")
+        metric2 = create_3d_metric_card("Win Rate Increase", "+15%", "+15%", "🎯")
         st.markdown(metric2, unsafe_allow_html=True)
     
     with col3:
-        metric3 = create_animated_metric("Sales Cycle<br>Reduction", "-20%", "-20%")
+        metric3 = create_3d_metric_card("Sales Cycle Reduction", "-20%", "-20%", "⚡")
         st.markdown(metric3, unsafe_allow_html=True)
     
     with col4:
-        metric4 = create_animated_metric("Forecast<br>Accuracy", "85%", "+25%")
+        metric4 = create_3d_metric_card("Forecast Accuracy", "85%", "+25%", "📈")
         st.markdown(metric4, unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Key Features
+    # 3D Key Features
     st.markdown("## 🎯 **Key Features**")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("""
-        <div class="feature-card">
-            <h3>🤖 Intelligent Health Scoring</h3>
-            <p>Advanced ensemble ML models (XGBoost + LightGBM) analyze 48+ features to predict opportunity health scores with 70% AUC accuracy.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        feature1 = create_3d_feature_card(
+            "Intelligent Health Scoring",
+            "Advanced ensemble ML models (XGBoost + LightGBM) analyze 48+ features to predict opportunity health scores with 70% AUC accuracy.",
+            "🤖",
+            "primary"
+        )
+        st.markdown(feature1, unsafe_allow_html=True)
         
-        st.markdown("""
-        <div class="feature-card">
-            <h3>⚡ Real-time Analytics</h3>
-            <p>Interactive dashboards with live monitoring, drift detection, and performance tracking across your entire sales portfolio.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        feature2 = create_3d_feature_card(
+            "Real-time Analytics",
+            "Interactive dashboards with live monitoring, drift detection, and performance tracking across your entire sales portfolio.",
+            "⚡",
+            "success"
+        )
+        st.markdown(feature2, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("""
-        <div class="feature-card">
-            <h3>🧠 AI-Powered Diagnostics</h3>
-            <p>Natural language explanations and actionable recommendations powered by Google Gemini AI for every opportunity.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        feature3 = create_3d_feature_card(
+            "AI-Powered Diagnostics",
+            "Natural language explanations and actionable recommendations powered by Google Gemini AI for every opportunity.",
+            "🧠",
+            "warning"
+        )
+        st.markdown(feature3, unsafe_allow_html=True)
         
-        st.markdown("""
-        <div class="feature-card">
-            <h3>🛡️ Automated Rescue Workflows</h3>
-            <p>Instant alerts and automated intervention workflows via Salesforce and Slack when deals show signs of risk.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        feature4 = create_3d_feature_card(
+            "Automated Rescue Workflows",
+            "Instant alerts and automated intervention workflows via Salesforce and Slack when deals show signs of risk.",
+            "🛡️",
+            "danger"
+        )
+        st.markdown(feature4, unsafe_allow_html=True)
     
     st.markdown("---")
     
@@ -245,37 +250,40 @@ def main():
     
     st.markdown("---")
     
-    # Technology Section
+    # 3D Technology Section with Parallax
+    parallax_section = create_3d_parallax_section()
+    st.markdown(parallax_section, unsafe_allow_html=True)
+    
     st.markdown("## 🔬 **Advanced Technology**")
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown("### 🤖 Machine Learning")
-        st.markdown("""
-        - **Ensemble Models**: XGBoost + LightGBM
-        - **48+ Features**: Advanced feature engineering
-        - **70% AUC**: Validated performance
-        - **Real-time Scoring**: Sub-second predictions
-        """)
+        tech1 = create_3d_feature_card(
+            "Machine Learning",
+            "Ensemble Models (XGBoost + LightGBM), 48+ Features, 70% AUC, Real-time Scoring",
+            "🤖",
+            "primary"
+        )
+        st.markdown(tech1, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("### 🧠 AI Integration")
-        st.markdown("""
-        - **Google Gemini**: Natural language diagnostics
-        - **Contextual Insights**: Personalized recommendations
-        - **Automated Workflows**: Smart interventions
-        - **Continuous Learning**: Model improvement
-        """)
+        tech2 = create_3d_feature_card(
+            "AI Integration",
+            "Google Gemini diagnostics, Contextual Insights, Automated Workflows, Continuous Learning",
+            "🧠",
+            "success"
+        )
+        st.markdown(tech2, unsafe_allow_html=True)
     
     with col3:
-        st.markdown("### ⚙️ Enterprise Ready")
-        st.markdown("""
-        - **Salesforce Integration**: Native CRM connectivity
-        - **Real-time Monitoring**: Performance tracking
-        - **Scalable Architecture**: Multi-user support
-        - **Security**: Role-based access control
-        """)
+        tech3 = create_3d_feature_card(
+            "Enterprise Ready",
+            "Salesforce Integration, Real-time Monitoring, Scalable Architecture, Security",
+            "⚙️",
+            "warning"
+        )
+        st.markdown(tech3, unsafe_allow_html=True)
     
     st.markdown("---")
     
