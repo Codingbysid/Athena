@@ -39,14 +39,16 @@ def test_gemini_api():
         return False
     
     try:
-        import google.generativeai as genai
+        from google import genai
         
-        # Configure the API
-        genai.configure(api_key=api_key)
+        # Create client
+        client = genai.Client(api_key=api_key)
         
-        # Test with a simple prompt
-        model = genai.GenerativeModel('gemini-1.5-pro')
-        response = model.generate_content("Hello! Can you help me with a quick test? Just say 'Athena API test successful'")
+        # Test with a simple prompt using the new API
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents="Hello! Can you help me with a quick test? Just say 'Athena API test successful'"
+        )
         
         if response.text:
             print("✅ Gemini API working correctly!")

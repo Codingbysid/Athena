@@ -22,4 +22,7 @@ sqlite3
 sqlalchemy>=1.4.0
 
 # Utilities
-python-dotenv>=1.0.0 
+python-dotenv>=1.0.0
+
+# AI and ML
+google-genai>=0.1.0 
