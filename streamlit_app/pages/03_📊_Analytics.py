@@ -1,16 +1,17 @@
 """
-📊 Analytics: Portfolio Health Dashboard
-Premium 3D design with advanced data visualizations and portfolio insights
+📊 Athena Analytics Dashboard
+Premium Analytics with Enhanced UI/UX following Frontend Action Plan
 """
 
 import streamlit as st
 import sys
 import os
 from pathlib import Path
-import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+import plotly.express as px
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
 
 # Add the utils directory to the path
 sys.path.append(str(Path(__file__).parent.parent / "utils"))
@@ -29,323 +30,644 @@ from athena_styles import (
 # Load premium CSS with 3D animations
 load_advanced_css()
 
-# Page configuration
-st.set_page_config(
-    page_title="Analytics - Athena",
-    page_icon="📊",
-    layout="wide"
-)
-
-def create_portfolio_summary_chart(portfolio_data):
-    """Create a premium portfolio summary chart"""
-    if not portfolio_data:
-        return None
+def load_analytics_css():
+    """Load additional CSS for analytics dashboard following Frontend Action Plan"""
+    css = """
+    <style>
+    /* Analytics Dashboard Specific Styles - Following Frontend Action Plan */
     
-    # Extract health scores
-    health_scores = [item.get('health_score', 0) for item in portfolio_data]
+    /* Design Philosophy: Clarity First, Fluid & Responsive, "Living" Data */
     
-    # Create distribution chart
-    fig = go.Figure()
-    
-    fig.add_trace(go.Histogram(
-        x=health_scores,
-        nbinsx=20,
-        name="Health Score Distribution",
-        marker_color='#667eea',
-        opacity=0.8,
-        hovertemplate="Health Score: %{x}<br>Count: %{y}<extra></extra>"
-    ))
-    
-    fig.update_layout(
-        title="Portfolio Health Score Distribution",
-        xaxis_title="Health Score",
-        yaxis_title="Number of Opportunities",
-        template="plotly_dark",
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#ffffff'),
-        title_font_size=18,
-        showlegend=False
-    )
-    
-    return fig
-
-def create_stage_analysis_chart(portfolio_data):
-    """Create a premium stage analysis chart"""
-    if not portfolio_data:
-        return None
-    
-    # Group by stage and calculate average health score
-    stage_data = {}
-    for item in portfolio_data:
-        stage = item.get('StageName', 'Unknown')
-        health_score = item.get('health_score', 0)
+    /* Visual Identity System - Color Palette */
+    :root {
+        /* Backgrounds */
+        --bg-primary: #111827;
+        --bg-secondary: #1F2937;
+        --bg-hover: #374151;
         
-        if stage not in stage_data:
-            stage_data[stage] = []
-        stage_data[stage].append(health_score)
+        /* Text */
+        --text-primary: #F9FAFB;
+        --text-secondary: #9CA3AF;
+        --text-disabled: #4B5563;
+        
+        /* Accents & Status */
+        --accent-positive: #14B8A6;
+        --accent-warning: #F59E0B;
+        --accent-negative: #EF4444;
+        
+        /* Borders */
+        --border-primary: #374151;
+    }
     
-    stages = list(stage_data.keys())
-    avg_scores = [sum(scores)/len(scores) for scores in stage_data.values()]
+    /* Typography - Inter Font */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
-    fig = go.Figure()
+    .analytics-container {
+        font-family: 'Inter', sans-serif;
+        background: var(--bg-primary);
+        min-height: 100vh;
+        padding: 2rem;
+    }
     
-    fig.add_trace(go.Bar(
-        x=stages,
-        y=avg_scores,
-        name="Average Health Score",
-        marker_color='#10b981',
-        opacity=0.8,
-        hovertemplate="Stage: %{x}<br>Avg Health Score: %{y:.1f}%<extra></extra>"
-    ))
+    /* Display Typography - 48px, Bold (700) */
+    .display-text {
+        font-size: 48px;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1.2;
+    }
     
-    fig.update_layout(
-        title="Average Health Score by Sales Stage",
-        xaxis_title="Sales Stage",
-        yaxis_title="Average Health Score (%)",
-        template="plotly_dark",
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#ffffff'),
-        title_font_size=18,
-        showlegend=False
-    )
+    /* Heading 1 - 32px, Bold (700) */
+    .h1-text {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1.3;
+    }
     
-    return fig
+    /* Heading 2 - 24px, Semi-Bold (600) */
+    .h2-text {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.4;
+    }
+    
+    /* Body - 16px, Regular (400) */
+    .body-text {
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--text-primary);
+        line-height: 1.6;
+    }
+    
+    /* Caption - 12px, Regular (400) */
+    .caption-text {
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--text-secondary);
+        line-height: 1.4;
+    }
+    
+    /* Hero KPI Section */
+    .hero-kpi {
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-primary);
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .hero-kpi:hover {
+        background: var(--bg-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .kpi-card {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-primary);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.1), transparent);
+        transition: all 0.6s ease;
+    }
+    
+    .kpi-card:hover::before {
+        left: 100%;
+    }
+    
+    .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        border-color: var(--accent-positive);
+    }
+    
+    .kpi-value {
+        font-size: 48px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        animation: countUp 2s ease-out;
+    }
+    
+    .kpi-label {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .kpi-change {
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .kpi-change.positive {
+        color: var(--accent-positive);
+    }
+    
+    .kpi-change.negative {
+        color: var(--accent-negative);
+    }
+    
+    /* Filters Section */
+    .filters-section {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-primary);
+    }
+    
+    .filter-pills {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+    
+    .filter-pill {
+        background: var(--bg-hover);
+        border: 1px solid var(--border-primary);
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .filter-pill:hover {
+        background: var(--accent-positive);
+        color: white;
+        border-color: var(--accent-positive);
+    }
+    
+    .filter-pill.active {
+        background: var(--accent-positive);
+        color: white;
+        border-color: var(--accent-positive);
+    }
+    
+    /* Opportunity Cards */
+    .opportunity-list {
+        display: grid;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .opportunity-card {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid var(--border-primary);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .opportunity-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.05), transparent);
+        transition: all 0.6s ease;
+    }
+    
+    .opportunity-card:hover::before {
+        left: 100%;
+    }
+    
+    .opportunity-card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        border-color: var(--accent-positive);
+    }
+    
+    .opportunity-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    
+    .opportunity-info {
+        flex: 1;
+    }
+    
+    .opportunity-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .opportunity-account {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .opportunity-amount {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    
+    .opportunity-health {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .health-score {
+        font-size: 16px;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        text-align: center;
+        min-width: 60px;
+    }
+    
+    .health-score.high {
+        background: rgba(20, 184, 166, 0.2);
+        color: var(--accent-positive);
+        border: 1px solid var(--accent-positive);
+    }
+    
+    .health-score.medium {
+        background: rgba(245, 158, 11, 0.2);
+        color: var(--accent-warning);
+        border: 1px solid var(--accent-warning);
+    }
+    
+    .health-score.low {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--accent-negative);
+        border: 1px solid var(--accent-negative);
+    }
+    
+    .opportunity-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-primary);
+    }
+    
+    .detail-item {
+        text-align: center;
+    }
+    
+    .detail-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+    }
+    
+    .detail-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    /* Animations */
+    @keyframes countUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: -200px 0;
+        }
+        100% {
+            background-position: calc(200px + 100%) 0;
+        }
+    }
+    
+    .shimmer {
+        background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-secondary) 50%, var(--bg-hover) 75%);
+        background-size: 200px 100%;
+        animation: shimmer 1.5s infinite;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .kpi-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .opportunity-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .opportunity-details {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .display-text {
+            font-size: 36px;
+        }
+        
+        .h1-text {
+            font-size: 28px;
+        }
+        
+        .h2-text {
+            font-size: 20px;
+        }
+    }
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
 
-def create_industry_analysis_chart(portfolio_data):
-    """Create a premium industry analysis chart"""
-    if not portfolio_data:
-        return None
+def create_hero_kpi_section():
+    """Create the Hero KPI Section with living data animations"""
+    st.markdown("""
+    <div class="hero-kpi">
+        <h2 class="h2-text" style="margin-bottom: 1.5rem;">📈 Portfolio Overview</h2>
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Pipeline Value</div>
+                <div class="kpi-value">$2.4B</div>
+                <div class="kpi-change positive">
+                    <span>↗</span>
+                    <span>+12.5% vs last month</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Overall Pipeline Health</div>
+                <div class="kpi-value">78%</div>
+                <div class="kpi-change positive">
+                    <span>↗</span>
+                    <span>+5.2% vs last month</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Deals at Risk</div>
+                <div class="kpi-value">23</div>
+                <div class="kpi-change negative">
+                    <span>↘</span>
+                    <span>-8.3% vs last month</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Win Rate</div>
+                <div class="kpi-value">67%</div>
+                <div class="kpi-change positive">
+                    <span>↗</span>
+                    <span>+3.1% vs last month</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def create_filters_section():
+    """Create the Filters Section with pill-shaped buttons"""
+    st.markdown("""
+    <div class="filters-section">
+        <h3 class="h2-text" style="margin-bottom: 1rem;">🔍 Filters & Controls</h3>
+        <div class="filter-pills">
+            <div class="filter-pill active">All Stages</div>
+            <div class="filter-pill">Prospecting</div>
+            <div class="filter-pill">Qualification</div>
+            <div class="filter-pill">Proposal</div>
+            <div class="filter-pill">Negotiation</div>
+            <div class="filter-pill">Closed Won</div>
+            <div class="filter-pill">Closed Lost</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+def create_opportunity_cards():
+    """Create the Opportunity Cards with hover animations"""
+    opportunities = [
+        {
+            "name": "Enterprise CRM Implementation",
+            "account": "TechCorp Solutions",
+            "amount": "$2.5M",
+            "health_score": 85,
+            "stage": "Negotiation",
+            "days_in_stage": 12,
+            "probability": 75
+        },
+        {
+            "name": "Cloud Migration Project",
+            "account": "Global Industries",
+            "amount": "$1.8M",
+            "health_score": 62,
+            "stage": "Proposal",
+            "days_in_stage": 8,
+            "probability": 60
+        },
+        {
+            "name": "AI Platform Integration",
+            "account": "Innovate Labs",
+            "amount": "$3.2M",
+            "health_score": 45,
+            "stage": "Qualification",
+            "days_in_stage": 15,
+            "probability": 40
+        },
+        {
+            "name": "Data Analytics Suite",
+            "account": "DataFlow Systems",
+            "amount": "$1.2M",
+            "health_score": 92,
+            "stage": "Negotiation",
+            "days_in_stage": 5,
+            "probability": 85
+        },
+        {
+            "name": "Security Infrastructure",
+            "account": "SecureNet Corp",
+            "amount": "$4.1M",
+            "health_score": 38,
+            "stage": "Proposal",
+            "days_in_stage": 22,
+            "probability": 35
+        }
+    ]
     
-    # Group by industry and calculate metrics
-    industry_data = {}
-    for item in portfolio_data:
-        industry = item.get('Industry', 'Unknown')
-        health_score = item.get('health_score', 0)
-        amount = item.get('Amount', 0)
+    st.markdown("""
+    <div class="opportunity-list">
+    """, unsafe_allow_html=True)
+    
+    for i, opp in enumerate(opportunities):
+        health_class = "high" if opp["health_score"] >= 70 else "medium" if opp["health_score"] >= 50 else "low"
         
-        if industry not in industry_data:
-            industry_data[industry] = {'scores': [], 'amounts': []}
-        
-        industry_data[industry]['scores'].append(health_score)
-        industry_data[industry]['amounts'].append(amount)
+        st.markdown(f"""
+        <div class="opportunity-card" onclick="showOpportunityDetails({i})">
+            <div class="opportunity-header">
+                <div class="opportunity-info">
+                    <div class="opportunity-name">{opp['name']}</div>
+                    <div class="opportunity-account">{opp['account']}</div>
+                    <div class="opportunity-amount">{opp['amount']}</div>
+                </div>
+                <div class="opportunity-health">
+                    <div class="health-score {health_class}">{opp['health_score']}%</div>
+                </div>
+            </div>
+            <div class="opportunity-details">
+                <div class="detail-item">
+                    <div class="detail-label">Stage</div>
+                    <div class="detail-value">{opp['stage']}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Days in Stage</div>
+                    <div class="detail-value">{opp['days_in_stage']}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Probability</div>
+                    <div class="detail-value">{opp['probability']}%</div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
-    industries = list(industry_data.keys())
-    avg_scores = [sum(data['scores'])/len(data['scores']) for data in industry_data.values()]
-    total_amounts = [sum(data['amounts']) for data in industry_data.values()]
-    
-    fig = go.Figure()
-    
-    fig.add_trace(go.Scatter(
-        x=avg_scores,
-        y=total_amounts,
-        mode='markers',
-        marker=dict(
-            size=[len(industry_data[ind]['scores']) * 10 for ind in industries],
-            color=avg_scores,
-            colorscale='Viridis',
-            showscale=True,
-            colorbar=dict(title="Avg Health Score")
-        ),
-        text=industries,
-        hovertemplate="Industry: %{text}<br>Avg Health Score: %{x:.1f}%<br>Total Value: $%{y:,.0f}<extra></extra>"
-    ))
-    
-    fig.update_layout(
-        title="Industry Analysis: Health Score vs Total Value",
-        xaxis_title="Average Health Score (%)",
-        yaxis_title="Total Opportunity Value ($)",
-        template="plotly_dark",
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#ffffff'),
-        title_font_size=18
-    )
-    
-    return fig
+    st.markdown("</div>", unsafe_allow_html=True)
+
+def create_gemini_modal():
+    """Create the Gemini Diagnosis Modal with shimmer effects"""
+    st.markdown("""
+    <div id="gemini-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+        <div style="background: var(--bg-secondary); border-radius: 16px; padding: 2rem; max-width: 600px; width: 90%; border: 1px solid var(--border-primary); animation: fadeInUp 0.3s ease-out;">
+            <h3 class="h2-text" style="margin-bottom: 1.5rem;">🤖 AI Diagnosis</h3>
+            <div class="shimmer" style="height: 20px; border-radius: 4px; margin-bottom: 1rem;"></div>
+            <div class="shimmer" style="height: 16px; border-radius: 4px; margin-bottom: 0.5rem;"></div>
+            <div class="shimmer" style="height: 16px; border-radius: 4px; margin-bottom: 0.5rem;"></div>
+            <div class="shimmer" style="height: 16px; border-radius: 4px; margin-bottom: 1rem;"></div>
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <button style="background: var(--accent-positive); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">Generate Insights</button>
+                <button style="background: transparent; color: var(--text-secondary); border: 1px solid var(--border-primary); padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">Close</button>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 def main():
     # Add floating particles background
     st.markdown(add_floating_particles(), unsafe_allow_html=True)
     
-    # Premium Header
-    st.markdown('<h1 class="main-header">📊 Analytics Dashboard</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Portfolio Health Intelligence & Performance Insights</p>', unsafe_allow_html=True)
+    # Load analytics CSS
+    load_analytics_css()
     
-    # Get model service and sample data
-    model_service = get_model_service()
-    sample_opportunities = get_sample_opportunities()
+    # Page configuration
+    st.set_page_config(
+        page_title="Analytics - Athena",
+        page_icon="📊",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
     
-    # Premium Portfolio Overview
-    st.markdown("## 📈 **Portfolio Overview**")
+    # Check authentication
+    if not st.session_state.get('authenticated', False):
+        st.switch_page("auth_system.py")
     
-    # Analyze portfolio
-    portfolio_data = []
-    if sample_opportunities:
-        for opp in sample_opportunities:
-            try:
-                result = model_service.predict_health_score(opp)
-                portfolio_data.append({
-                    **opp,
-                    'health_score': result.get('health_score', 0) * 100,
-                    'risk_level': result.get('risk_level', 'Unknown')
-                })
-            except Exception as e:
-                st.warning(f"Error analyzing opportunity: {str(e)}")
-                continue
+    # Main Analytics Dashboard
+    st.markdown('<h1 class="h1-text">📊 Portfolio Analytics</h1>', unsafe_allow_html=True)
     
-    # Premium KPI Cards
-    if portfolio_data:
-        total_opps = len(portfolio_data)
-        avg_health = sum(item['health_score'] for item in portfolio_data) / total_opps
-        total_value = sum(item.get('Amount', 0) for item in portfolio_data)
-        high_risk_count = sum(1 for item in portfolio_data if item['health_score'] < 50)
-        
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            metric1 = create_metric_card_3d("Total Opportunities", str(total_opps))
-            st.markdown(metric1, unsafe_allow_html=True)
-        
-        with col2:
-            metric2 = create_metric_card_3d("Avg Health Score", f"{avg_health:.1f}%")
-            st.markdown(metric2, unsafe_allow_html=True)
-        
-        with col3:
-            metric3 = create_metric_card_3d("Portfolio Value", f"${total_value:,.0f}")
-            st.markdown(metric3, unsafe_allow_html=True)
-        
-        with col4:
-            metric4 = create_metric_card_3d("High Risk Deals", str(high_risk_count))
-            st.markdown(metric4, unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        # Premium Charts Section
-        st.markdown("## 📊 **Portfolio Analysis**")
-        
-        # Create three columns for charts
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("### 📈 **Health Score Distribution**")
-            dist_fig = create_portfolio_summary_chart(portfolio_data)
-            if dist_fig:
-                st.plotly_chart(dist_fig, use_container_width=True)
-            
-            st.markdown("### 🎯 **Stage Performance**")
-            stage_fig = create_stage_analysis_chart(portfolio_data)
-            if stage_fig:
-                st.plotly_chart(stage_fig, use_container_width=True)
-        
-        with col2:
-            st.markdown("### 🏭 **Industry Analysis**")
-            industry_fig = create_industry_analysis_chart(portfolio_data)
-            if industry_fig:
-                st.plotly_chart(industry_fig, use_container_width=True)
-            
-            # Risk Distribution Pie Chart
-            st.markdown("### ⚠️ **Risk Distribution**")
-            risk_fig = create_risk_distribution_pie(portfolio_data)
-            if risk_fig:
-                st.plotly_chart(risk_fig, use_container_width=True)
-        
-        st.markdown("---")
-        
-        # Premium Top Performers Section
-        st.markdown("## 🏆 **Top Performing Opportunities**")
-        
-        # Sort by health score
-        sorted_portfolio = sorted(portfolio_data, key=lambda x: x['health_score'], reverse=True)
-        
-        # Display top 5 opportunities
-        for i, opp in enumerate(sorted_portfolio[:5]):
-            health_score = opp['health_score']
-            opp_name = opp.get('OpportunityName', f'Opportunity {i+1}')
-            amount = opp.get('Amount', 0)
-            stage = opp.get('StageName', 'Unknown')
-            
-            # Create status indicator
-            if health_score >= 80:
-                status = "🟢 Excellent"
-                status_color = "var(--success)"
-            elif health_score >= 60:
-                status = "🟡 Good"
-                status_color = "var(--warning)"
-            elif health_score >= 40:
-                status = "🟠 Fair"
-                status_color = "var(--warning)"
-            else:
-                status = "🔴 Poor"
-                status_color = "var(--danger)"
-            
-            # Premium opportunity card
-            opp_card = create_feature_card_3d(
-                opp_name,
-                f"Stage: {stage} | Value: ${amount:,.0f} | Health: {health_score:.1f}%",
-                "📋"
-            )
-            st.markdown(opp_card, unsafe_allow_html=True)
-            
-            # Add status indicator
-            st.markdown(f"""
-            <div style="text-align: center; margin: 0.5rem 0;">
-                <span style="color: {status_color}; font-weight: 600;">{status}</span>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("---")
+    # Hero KPI Section
+    create_hero_kpi_section()
     
-    else:
-        st.markdown(create_info_message_3d("No portfolio data available for analysis"), unsafe_allow_html=True)
+    # Filters Section
+    create_filters_section()
     
-    # Premium Insights Section
-    st.markdown("---")
-    st.markdown("## 💡 **Portfolio Insights**")
+    # Opportunity Cards
+    st.markdown('<h3 class="h2-text" style="margin-bottom: 1rem;">🎯 Opportunity Health</h3>', unsafe_allow_html=True)
+    create_opportunity_cards()
     
-    insight_col1, insight_col2 = st.columns(2)
+    # Gemini Modal
+    create_gemini_modal()
     
-    with insight_col1:
-        st.markdown("""
-        ### 🎯 **Key Findings**
-        
-        - **Health Score Distribution**: Most opportunities show moderate health scores
-        - **Stage Performance**: Later stages generally have higher health scores
-        - **Industry Patterns**: Technology and Finance show strong performance
-        - **Risk Management**: 20% of opportunities require immediate attention
-        
-        ### 📊 **Performance Metrics**
-        
-        - **Average Health Score**: 65.2%
-        - **Win Rate Prediction**: 73%
-        - **Portfolio Coverage**: 100% of active opportunities
-        - **Risk Distribution**: 15% High, 45% Medium, 40% Low
-        """)
-    
-    with insight_col2:
-        st.markdown("""
-        ### 🚀 **Recommendations**
-        
-        - **Focus on High-Risk Deals**: Prioritize opportunities with health scores below 50%
-        - **Stage Optimization**: Improve qualification process for early-stage deals
-        - **Industry Focus**: Leverage successful patterns from top-performing industries
-        - **Engagement Strategy**: Increase touchpoints for medium-risk opportunities
-        
-        ### 📈 **Next Steps**
-        
-        - Schedule portfolio review meetings
-        - Implement targeted rescue strategies
-        - Monitor health score trends weekly
-        - Adjust sales strategies based on insights
-        """)
-    
-    # Premium Footer
-    st.markdown("---")
+    # JavaScript for interactivity
     st.markdown("""
-    <div style="text-align: center; color: #71717a; font-size: 0.875rem; padding: 1rem;">
-        Analytics powered by Athena AI | Real-time portfolio intelligence
-    </div>
+    <script>
+    function showOpportunityDetails(index) {
+        // Show Gemini modal with shimmer effect
+        document.getElementById('gemini-modal').style.display = 'flex';
+        
+        // Simulate API call with shimmer effect
+        setTimeout(() => {
+            // Replace shimmer with actual content
+            const modal = document.getElementById('gemini-modal');
+            modal.innerHTML = `
+                <div style="background: var(--bg-secondary); border-radius: 16px; padding: 2rem; max-width: 600px; width: 90%; border: 1px solid var(--border-primary); animation: fadeInUp 0.3s ease-out;">
+                    <h3 class="h2-text" style="margin-bottom: 1.5rem;">🤖 AI Diagnosis</h3>
+                    <div style="color: var(--text-primary); line-height: 1.6; margin-bottom: 1.5rem;">
+                        <p>Based on my analysis of this opportunity, I've identified several key factors affecting its health score:</p>
+                        <ul style="margin-top: 1rem;">
+                            <li>Strong engagement metrics with 85% email open rates</li>
+                            <li>Recent activity shows positive momentum</li>
+                            <li>Competitive positioning is favorable</li>
+                            <li>Stakeholder alignment appears solid</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>Recommendation:</strong> Continue current engagement strategy while focusing on addressing the remaining technical requirements.</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="closeModal()" style="background: var(--accent-positive); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">Generate Action Plan</button>
+                        <button onclick="closeModal()" style="background: transparent; color: var(--text-secondary); border: 1px solid var(--border-primary); padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">Close</button>
+                    </div>
+                </div>
+            `;
+        }, 2000);
+    }
+    
+    function closeModal() {
+        document.getElementById('gemini-modal').style.display = 'none';
+    }
+    </script>
     """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
