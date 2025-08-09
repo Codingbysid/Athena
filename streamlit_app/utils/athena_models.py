@@ -21,7 +21,7 @@ warnings.filterwarnings('ignore', category=UserWarning)
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'scripts'))
 
 # Import configuration
-from config import get_config
+from utils.config import get_config
 
 # Custom exceptions for better error handling
 class AthenaModelError(Exception):
